@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: user-service-inno
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/myuser_service_db
+    username: ${SPRING_DATASOURCE_USERNAME:postgres_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:123}
+    driver-class-name: org.postgresql.Driver
+
+  liquibase:
+    enabled: true
+    changelog: classpath:db/changelog/db.changelog-master.yaml
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
