@@ -4,6 +4,7 @@ package com.example.user_service_inno.entity;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -22,6 +23,7 @@ import lombok.Setter;
 @Getter //(AccessLevel.PUBLIC)
 @NoArgsConstructor
 @Entity
+@DynamicUpdate
 @Table(name = "payment_cards")
 public class PaymentCard {
     
