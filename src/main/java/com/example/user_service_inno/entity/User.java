@@ -2,6 +2,7 @@ package com.example.user_service_inno.entity;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,5 +62,5 @@ public class User {
     private Instant updatedAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PaymentCard> cards;
+    private List<PaymentCard> cards = new ArrayList<>();
 }

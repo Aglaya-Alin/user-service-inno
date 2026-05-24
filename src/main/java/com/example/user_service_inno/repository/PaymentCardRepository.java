@@ -17,4 +17,6 @@ public interface PaymentCardRepository extends JpaRepository<PaymentCard, UUID>,
 
     @Query(value = "SELECT * FROM PaymentCard WHERE user_id = ?1", nativeQuery = true)
     List<PaymentCard> getAllPaymnetCardByUserId(UUID userId);
+
+    int countByUserId(UUID userId);
 }
