@@ -6,7 +6,7 @@ import com.example.user_service_inno.entity.User;
 
 public class UserSpecifications {
 
-     public static Specification<User> hasFirstName(String firstName) {
+    public static Specification<User> hasFirstName(String firstName) {
         return (root, query, criteriaBuilder) -> {
             if (firstName == null || firstName.isBlank()) {
                 return criteriaBuilder.conjunction();
