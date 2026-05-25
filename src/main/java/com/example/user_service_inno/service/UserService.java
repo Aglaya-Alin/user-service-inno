@@ -1,6 +1,5 @@
 package com.example.user_service_inno.service;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -14,6 +13,7 @@ import com.example.user_service_inno.api.dto.UserDTO;
 import com.example.user_service_inno.api.mapper.UserMapper;
 import com.example.user_service_inno.entity.User;
 import com.example.user_service_inno.repository.UserRepository;
+import com.example.user_service_inno.service.exceptions.ResourceNotFoundException;
 import com.example.user_service_inno.specification.UserSpecifications;
 
 import lombok.RequiredArgsConstructor;
@@ -28,23 +28,21 @@ public class UserService {
     private final UserMapper userMapper;
 
     @Transactional
-    public User createUser(UserDTO userDTO){
-        try {
-            User saved = userRepository.save(userMapper.toEntity(userDTO));
-            return saved;
-        } catch (Exception ex) {
-            throw ex;
-        }
+    public UserDTO createUser(UserDTO userDTO){
+        User saved = userRepository.save(userMapper.toEntity(userDTO));
+        return userMapper.toDto(saved);
     }
 
-    public Optional<User> getUserById(UUID userId){
-        return userRepository.findById(userId);
+    public UserDTO getUserById(UUID userId){
+        return userRepository.findById(userId)
+            .map(userMapper::toDto)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
     }
 
     @Transactional
     public UserDTO updateUser(UUID userId, UserDTO userDTO){
         User existingUser = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         userMapper.updateEntityFromDto(userDTO, existingUser);
 
@@ -65,18 +63,30 @@ public class UserService {
         return userPage.map(userMapper::toDto);
     }
 
-    public void activateUser(UUID userId){
+    public UserDTO activateUser(UUID userId){
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         
         user.setIsActive(true);
         userRepository.save(user);
+        return userMapper.toDto(user);
+    }
+    public UserDTO deactivateUser(UUID userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        
+        user.setIsActive(false);
+        userRepository.save(user);
+        return userMapper.toDto(user);
     }
     
     @Transactional
     public void deleteUserById(UUID id){
         if (userRepository.existsById(id)){
             userRepository.deleteById(id);
+        }
+        else{
+            throw new ResourceNotFoundException("User not found with id: " + id);
         }
     }
 
