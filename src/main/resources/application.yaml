@@ -1,6 +1,10 @@
 spring:
   application:
     name: user-service-inno
+  data:
+    redis:
+      host: localhost
+      port: 6379
   
   datasource:
     url: jdbc:postgresql://localhost:5432/myuser_service_db

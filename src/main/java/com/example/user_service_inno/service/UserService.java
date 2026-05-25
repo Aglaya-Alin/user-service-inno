@@ -2,6 +2,9 @@ package com.example.user_service_inno.service;
 
 import java.util.UUID;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,21 +31,24 @@ public class UserService {
     private final UserMapper userMapper;
 
     @Transactional
+    @CachePut(value = "users", key = "#result.id")
     public UserDTO createUser(UserDTO userDTO){
         User saved = userRepository.save(userMapper.toEntity(userDTO));
         return userMapper.toDto(saved);
     }
 
-    public UserDTO getUserById(UUID userId){
-        return userRepository.findById(userId)
+    @Cacheable(value = "users", key = "#id")
+    public UserDTO getUserById(UUID id){
+        return userRepository.findById(id)
             .map(userMapper::toDto)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
     }
 
     @Transactional
-    public UserDTO updateUser(UUID userId, UserDTO userDTO){
-        User existingUser = userRepository.findById(userId)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+    @CachePut(value = "users", key = "#id")
+    public UserDTO updateUser(UUID id, UserDTO userDTO){
+        User existingUser = userRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
         userMapper.updateEntityFromDto(userDTO, existingUser);
 
@@ -62,18 +68,22 @@ public class UserService {
 
         return userPage.map(userMapper::toDto);
     }
-
-    public UserDTO activateUser(UUID userId){
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+    
+    @Transactional
+    @CachePut(value = "users", key = "#id")
+    public UserDTO activateUser(UUID id){
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         
         user.setIsActive(true);
         userRepository.save(user);
         return userMapper.toDto(user);
     }
-    public UserDTO deactivateUser(UUID userId){
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+    @Transactional
+    @CachePut(value = "users", key = "#id")
+    public UserDTO deactivateUser(UUID id){
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         
         user.setIsActive(false);
         userRepository.save(user);
@@ -81,6 +91,7 @@ public class UserService {
     }
     
     @Transactional
+    @CacheEvict(value = "users", key = "#id")
     public void deleteUserById(UUID id){
         if (userRepository.existsById(id)){
             userRepository.deleteById(id);
