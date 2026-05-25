@@ -3,6 +3,9 @@ package com.example.user_service_inno.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +32,7 @@ public class PaymentCardService {
     private final PaymentCardMapper paymentCardMapper;
     
     @Transactional
+    @CacheEvict(value = "userCards", key = "#userId")
     public PaymentCardDTO createCard(UUID userId, PaymentCardDTO paymentCardDTO){
 
         User user = userRepository.findById(userId)
@@ -48,6 +52,7 @@ public class PaymentCardService {
         return paymentCardMapper.toDto(savedCard);
     }
 
+    @Cacheable(value = "cards", key = "#id")
     public PaymentCardDTO getPaymentCardById(UUID id){
         return paymentCardRepository.findById(id)
             .map(paymentCardMapper::toDto)
@@ -55,6 +60,8 @@ public class PaymentCardService {
     }
 
     @Transactional
+    @CachePut(value = "cards", key = "#id")
+    @CacheEvict(value = "userCards", key = "#result.userId")
     public PaymentCardDTO updateCard(UUID id, PaymentCardDTO paymentCardDTO){
         PaymentCard existingCard = paymentCardRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Card not found with id: " + id));
@@ -65,6 +72,8 @@ public class PaymentCardService {
         return paymentCardMapper.toDto(updatedCard);     
     }
 
+    @Transactional
+    @CacheEvict(value = "cards", key = "#id")
     public void deletePaymentCard(UUID id){
         PaymentCard card = paymentCardRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Card not found with id: " + id));
         User user = card.getUser();
@@ -84,6 +93,7 @@ public class PaymentCardService {
         return paymentCardPage.map(paymentCardMapper::toDto);
     }
 
+    @Cacheable(value = "userCards", key = "#userId")
     public List<PaymentCardDTO> getAllPaymentCardByUserId(UUID userId){
         
         List<PaymentCard> card = paymentCardRepository.getAllPaymentCardByUserId(userId);
@@ -93,6 +103,7 @@ public class PaymentCardService {
     }
 
     @Transactional
+    @CachePut(value = "cards", key = "#id")
     public PaymentCardDTO activatePaymentCard(UUID id){
         PaymentCard card = paymentCardRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Card not found with id: " + id));
         card.setIsActive(true);
@@ -101,6 +112,7 @@ public class PaymentCardService {
     }
     
     @Transactional
+    @CachePut(value = "cards", key = "#id")
     public PaymentCardDTO deactivatePaymentCard(UUID id){
         PaymentCard card = paymentCardRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Card not found with id: " + id));
         card.setIsActive(false);
