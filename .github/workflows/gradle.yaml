@@ -78,6 +78,10 @@ jobs:
         name: project-artifacts
         path: build/
 
+    - name: Downcase repository name
+      run: |
+        echo "IMAGE_TAG=ghcr.io/${{ github.repository_repository }}/myapp:latest" | tr '[:upper:]' '[:lower:]' >> $GITHUB_ENV
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
@@ -86,7 +90,7 @@ jobs:
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }} 
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
@@ -94,4 +98,13 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ghcr.io/${{ github.repository }}/myapp:latest
+        tags: ghcr.io/${{ f.lower(github.repository) }}/myapp:latest
+
+    - name: Output Docker Image Link
+      run: |
+        IMAGE_URL="https://github.com{{ github.repository }}/pkgs/container/myapp"
+        echo "### Docker Image Created successfully!" >> $GITHUB_STEP_SUMMARY
+        echo "Download docker image:" >> $GITHUB_STEP_SUMMARY
+        echo "[Link to docker image]($IMAGE_URL)" >> $GITHUB_STEP_SUMMARY
+        echo "Link:"
+        echo "$IMAGE_URL"
