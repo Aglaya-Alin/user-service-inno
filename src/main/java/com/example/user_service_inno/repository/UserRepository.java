@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 import com.example.user_service_inno.entity.User;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User>{}
+public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User>{
+    
+}

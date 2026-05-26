@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '4.1.0-SNAPSHOT'
+	id 'org.springframework.boot' version '4.0.6'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -15,44 +15,61 @@ java {
 
 repositories {
 	mavenCentral()
-	maven { url = 'https://repo.spring.io/snapshot' }
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework:spring-web:7.0.7'
-	implementation 'org.hibernate.validator:hibernate-validator:9.1.0.Final'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'jakarta.validation:jakarta.validation-api:3.1.1'
+	implementation 'org.hibernate.validator:hibernate-validator'
+	implementation 'jakarta.validation:jakarta.validation-api'
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.2'
 
-	runtimeOnly 'org.postgresql:postgresql'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-liquibase'
 	implementation 'org.liquibase:liquibase-core:5.0.3'
+	runtimeOnly 'org.postgresql:postgresql'
+
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 	implementation 'org.mapstruct:mapstruct:1.6.3'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-	
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-	// Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-	// Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-cache
-	implementation 'org.springframework.boot:spring-boot-starter-cache'
-	// Source: https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.2'
-
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-	testCompileOnly 'org.projectlombok:lombok'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	
+	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
+
+
+	testImplementation 'org.testcontainers:postgresql:1.21.4'
+    testImplementation 'org.testcontainers:junit-jupiter:1.21.4'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	// Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-webmvc-test
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test:4.0.6'
 }
 
+
+
 tasks.named('test') {
-	useJUnitPlatform()
+  	useJUnitPlatform()
+  	testLogging {
+        events "failed"
+        exceptionFormat "full"
+        showExceptions true
+        showCauses true
+        showStackTraces true
+		showStandardStreams = true 
+    }
 }
 
 tasks.named('bootRun') {
