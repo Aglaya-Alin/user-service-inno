@@ -79,9 +79,9 @@ jobs:
         path: build/
 
     - name: Downcase repository name
-        run: |
-          LOW_REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          echo "IMAGE_TAG=ghcr.io/$LOW_REPO/myapp:latest" >> $GITHUB_ENV
+      run: |
+        LOW_REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+        echo "IMAGE_TAG=ghcr.io/$LOW_REPO/myapp:latest" >> $GITHUB_ENV
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
