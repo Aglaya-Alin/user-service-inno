@@ -21,6 +21,7 @@ sonar {
         property "sonar.projectKey", "Aglaya-Alin_user-service-inno"
         property "sonar.organization", "aglaya-alin"
         property "sonar.host.url", "https://sonarcloud.io"
+		property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
     }
 }
 
