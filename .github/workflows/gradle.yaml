@@ -103,12 +103,3 @@ jobs:
         file: ./Dockerfile
         push: true
         tags: ${{ env.IMAGE_TAG }}
-
-    - name: Output Docker Image Link
-      run: |
-        IMAGE_URL="https://github.com/${{ github.repository }}/packages/container/myapp"
-        echo "### Docker Image Created successfully!" >> $GITHUB_STEP_SUMMARY
-        echo "Download docker image:" >> $GITHUB_STEP_SUMMARY
-        echo "[Link to docker image]($IMAGE_URL)" >> $GITHUB_STEP_SUMMARY
-        echo "Link:"
-        echo "$IMAGE_URL"
