@@ -6,14 +6,14 @@ import com.example.user_service_inno.entity.User;
 
 public class UserSpecifications {
 
-    public static Specification<User> hasFirstName(String firstName) {
+    public static Specification<User> hasFirstName(String name) {
         return (root, query, criteriaBuilder) -> {
-            if (firstName == null || firstName.isBlank()) {
+            if (name == null || name.isBlank()) {
                 return criteriaBuilder.conjunction();
             }
             return criteriaBuilder.like(
-                criteriaBuilder.lower(root.get("firstName")), 
-                "%" + firstName.toLowerCase() + "%"
+                criteriaBuilder.lower(root.get("name")), 
+                "%" + name.toLowerCase() + "%"
             );
         };
     }

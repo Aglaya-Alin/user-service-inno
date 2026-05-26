@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import com.example.user_service_inno.entity.PaymentCard;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -39,5 +38,5 @@ public record UserDTO (
     
     Instant updatedAt,
 
-    List<PaymentCard> cards){}
+    List<PaymentCardDTO> cards){}
 
