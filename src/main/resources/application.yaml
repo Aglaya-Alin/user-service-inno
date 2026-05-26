@@ -1,16 +1,6 @@
 spring:
   application:
     name: user-service-inno
-  data:
-    redis:
-      host: localhost
-      port: 6379
-  
-  datasource:
-    url: jdbc:postgresql://localhost:5432/myuser_service_db
-    username: ${SPRING_DATASOURCE_USERNAME:postgres_user}
-    password: ${SPRING_DATASOURCE_PASSWORD:123}
-    driver-class-name: org.postgresql.Driver
 
   liquibase:
     enabled: true
@@ -20,3 +10,41 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: validate
+
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/myuser_service_db
+    username: postgres_user
+    password: 123
+    driver-class-name: org.postgresql.Driver
+
+---  
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  data:
+    redis:
+      host: redis
+      port: 6379
+    
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  
