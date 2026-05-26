@@ -79,8 +79,9 @@ jobs:
         path: build/
 
     - name: Downcase repository name
-      run: |
-        echo "IMAGE_TAG=ghcr.io/${{ github.repository_repository }}/myapp:latest" | tr '[:upper:]' '[:lower:]' >> $GITHUB_ENV
+        run: |
+          LOW_REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE_TAG=ghcr.io/$LOW_REPO/myapp:latest" >> $GITHUB_ENV
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -98,11 +99,11 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ghcr.io/${{ f.lower(github.repository) }}/myapp:latest
+        tags: ${{ env.IMAGE_TAG }}
 
     - name: Output Docker Image Link
       run: |
-        IMAGE_URL="https://github.com{{ github.repository }}/pkgs/container/myapp"
+        IMAGE_URL="https://github.com/${{ github.repository }}/packages/container/myapp"
         echo "### Docker Image Created successfully!" >> $GITHUB_STEP_SUMMARY
         echo "Download docker image:" >> $GITHUB_STEP_SUMMARY
         echo "[Link to docker image]($IMAGE_URL)" >> $GITHUB_STEP_SUMMARY
