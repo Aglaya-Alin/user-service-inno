@@ -8,64 +8,11 @@ on:
 
 jobs:
 
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
 
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v4.0.0
-
-    - name: Build with Gradle Wrapper
-      run: ./gradlew assemble
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: java-build-artifacts
-        path: |
-            build/
-            .gradle/
-
-  test:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v4.0.0
-
-    - name: Download build a
-      uses: actions/upload-artifact@v4
-      with: 
-        name: java-build-artifacts
-    - name: Run tests
-      run: ./gradlew test jacocoTestReport
-    - name: Upload Test Reports
-      uses: actions/upload-artifact@v4
-      with:
-        name: java-test-reports
-        path: build/reports/
-
-  Code-analysis:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
@@ -74,11 +21,34 @@ jobs:
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
-    - name: Download Build and Test Artifacts
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build and Test with Gradle
+      run: ./gradlew build jacocoTestReport
+
+    - name: Upload Project Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: project-artifacts
+        path: build/
+
+  code-analysis:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Download Project Artifacts
       uses: actions/download-artifact@v4
       with:
-        name: java-test-reports
-        path: build/reports/
+        name: project-artifacts
+        path: build/
+
     - name: SonarQube Scan
       uses: sonarsource/sonarqube-scan-action@v3
       env:
@@ -92,18 +62,22 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Download Build Artifacts
+    - name: Download Project Artifacts
       uses: actions/download-artifact@v4
       with:
-        name: java-build-artifacts
+        name: project-artifacts
+        path: build/
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
+
     - name: Log in to GitHub Container Registry
       uses: docker/login-action@v3
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }} 
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
