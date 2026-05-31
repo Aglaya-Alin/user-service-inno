@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.CascadeType;
@@ -17,6 +17,7 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -28,7 +29,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-@Table(name = "users") //, unique = true ?
+@Table(name = "users", indexes = {
+        @Index(name = "email_index", columnList = "email", unique = true)
+    })
 public class User {
     
     @Id
@@ -50,11 +53,11 @@ public class User {
     @Column(nullable = false, name = "is_active")
     private Boolean isActive = true;
 
-    @CreationTimestamp
+    @CreatedDate
     @Column(updatable = false, name = "created_at", nullable = false)
     private Instant createdAt;
     
-    @CreatedDate
+    @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 

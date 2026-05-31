@@ -2,6 +2,7 @@ FROM gradle:jdk21-corretto AS builder
 WORKDIR /app
 
 COPY build.gradle settings.gradle ./
+RUN gradle dependencies --no-daemon --quiet || true
 COPY src ./src
 
 RUN gradle bootJar -x test --no-daemon --quiet

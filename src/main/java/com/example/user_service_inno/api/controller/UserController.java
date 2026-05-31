@@ -20,15 +20,18 @@ import com.example.user_service_inno.api.dto.UserDTO;
 import com.example.user_service_inno.service.UserService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @RequestMapping("/users")
 @RestController
 public class UserController {
-    @Autowired private UserService userService;
+
+    private final UserService userService;
 
 
-    @GetMapping("/{user_id}")
-    public ResponseEntity<?> getUser(@PathVariable("user_id") UUID userId
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserDTO> getUser(@PathVariable UUID userId
     ) {
         UserDTO userDto = userService.getUserById(userId);
 
@@ -48,14 +51,14 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addUser(@RequestBody @Valid UserDTO userDTO) {
+    public ResponseEntity<UserDTO> addUser(@RequestBody @Valid UserDTO userDTO) {
         UserDTO createdUser = userService.createUser(userDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
-    @PatchMapping("/{user_id}")
-    public ResponseEntity<?> updateUser(@PathVariable("user_id") UUID userId,
+    @PatchMapping("/{userId}")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable UUID userId,
                               @RequestBody @Valid UserDTO userDto
     ) {
         UserDTO updatedUserDto = userService.updateUser(userId, userDto);
@@ -63,20 +66,20 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(updatedUserDto);
     }
 
-    @DeleteMapping("/{user_id}")
-    public ResponseEntity<?> deleteUser(@PathVariable("user_id") UUID userId) {
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
         userService.deleteUserById(userId);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @PatchMapping("/activate/{user_id}")
-    public ResponseEntity<?> activateUser(@PathVariable("user_id") UUID userId) {
+    @PatchMapping("/activate/{userId}")
+    public ResponseEntity<UserDTO> activateUser(@PathVariable UUID userId) {
         UserDTO activatedUserDto = userService.activateUser(userId);
         return ResponseEntity.status(HttpStatus.OK).body(activatedUserDto);
     }
 
-    @PatchMapping("/deactivate/{user_id}")
-    public ResponseEntity<?> deactivateUser(@PathVariable("user_id") UUID userId) {
+    @PatchMapping("/deactivate/{userId}")
+    public ResponseEntity<UserDTO> deactivateUser(@PathVariable UUID userId) {
         UserDTO deactivatedUserDto = userService.deactivateUser(userId);
 
         return ResponseEntity.status(HttpStatus.OK).body(deactivatedUserDto);

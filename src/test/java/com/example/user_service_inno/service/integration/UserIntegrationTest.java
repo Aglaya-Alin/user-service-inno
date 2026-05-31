@@ -19,10 +19,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.test.context.ActiveProfiles;
 import com.example.user_service_inno.api.dto.UserDTO;
@@ -31,8 +29,6 @@ import com.example.user_service_inno.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import lombok.RequiredArgsConstructor;
 
 
 
@@ -46,7 +42,6 @@ public class UserIntegrationTest extends BaseIntegrationTest{
     private UserRepository userRepository;
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
-            // Гэты радок вельмі важны! Ён ператварае даты ў радкі "2000-01-10", якія чакае ваш кантролер
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); 
     @BeforeEach
     public void cleanDatabase() {
@@ -173,7 +168,7 @@ public class UserIntegrationTest extends BaseIntegrationTest{
         user = userRepository.save(user);
 
         mockMvc.perform(delete("/users/{user_id}", user.getId()))
-                .andExpect(status().isOk());
+                .andExpect(status().is(204));
 
         assertThat(userRepository.findById(user.getId())).isEmpty();
     }

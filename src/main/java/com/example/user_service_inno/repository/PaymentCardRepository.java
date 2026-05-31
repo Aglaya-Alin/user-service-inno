@@ -15,7 +15,7 @@ import com.example.user_service_inno.entity.PaymentCard;
 @Repository
 public interface PaymentCardRepository extends JpaRepository<PaymentCard, UUID>, JpaSpecificationExecutor<PaymentCard>{
 
-    @Query(value = "SELECT * FROM PaymentCard WHERE user_id = ?1", nativeQuery = true)
+    @Query(value = "SELECT * FROM payment_cards WHERE user_id = ?1", nativeQuery = true)
     List<PaymentCard> getAllPaymentCardByUserId(UUID userId);
 
     int countByUserId(UUID userId);

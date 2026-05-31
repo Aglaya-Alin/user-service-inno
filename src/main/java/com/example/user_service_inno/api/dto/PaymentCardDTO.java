@@ -1,33 +1,32 @@
 package com.example.user_service_inno.api.dto;
 
 import java.time.Instant;
+import java.time.YearMonth;
 import java.util.UUID;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 public record PaymentCardDTO (
 
     UUID id,
     
-    UUID user_id,
+    UUID userId,
 
-    @NotNull(message = "Card number is required")
-    @Min(value = 1000000000000000L, message = "Card number must be 16 digits")
-    @Max(value = 9999999999999999L, message = "Card number must be 16 digits")
-    Long number,
+    @NotBlank(message = "Card number is required")
+    @Pattern(regexp = "\\d{16}", message = "Card number should contain 16 digits")
+    String number,
 
     @NotBlank(message = "Holder cannot be blank")
     String holder,
 
-    Instant expirationDate,
+    @FutureOrPresent(message = "Срок действия карты не может быть в прошлом")
+    YearMonth expirationDate,
 
     Boolean isActive,
 
     Instant createdAt,
     
     Instant updatedAt
-
 ){}

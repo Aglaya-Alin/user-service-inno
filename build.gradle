@@ -1,100 +1,126 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '4.0.6'
-	id 'io.spring.dependency-management' version '1.1.7'
-
-	id 'jacoco'
-	id("org.sonarqube") version "7.3.0.8198"
+    id 'java'
+    id 'org.springframework.boot' version '4.0.6'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
+    id "org.sonarqube" version "7.3.0.8198"
 }
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 
-jacocoTestReport {
-    reports {
-        xml.required = true
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.hibernate.validator:hibernate-validator'
+    implementation 'jakarta.validation:jakarta.validation-api'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.2'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-liquibase'
+    implementation 'org.liquibase:liquibase-core:5.0.3'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+    
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.testcontainers:postgresql:1.21.4'
+    testImplementation 'org.testcontainers:junit-jupiter:1.21.4'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test:4.0.6'
+}
+
+// 1. Единая настройка генерации отчетов JaCoCo
+jacocoTestReport {
+    dependsOn test // Отчет строится только после прохождения тестов
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+// 2. Исправленная настройка Sonar с динамическим путем к отчету
 sonar {
     properties {
         property "sonar.projectKey", "Aglaya-Alin_user-service-inno"
         property "sonar.organization", "aglaya-alin"
         property "sonar.host.url", "https://sonarcloud.io"
-		property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
-    }
-}
-
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
-}
-
-repositories {
-	mavenCentral()
-}
-
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.hibernate.validator:hibernate-validator'
-	implementation 'jakarta.validation:jakarta.validation-api'
-	implementation 'com.fasterxml.jackson.core:jackson-databind'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.2'
-
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-liquibase'
-	implementation 'org.liquibase:liquibase-core:5.0.3'
-	runtimeOnly 'org.postgresql:postgresql'
-
-	implementation 'org.springframework.boot:spring-boot-starter-cache'
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-
-	implementation 'org.mapstruct:mapstruct:1.6.3'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-
-	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	
-	testCompileOnly 'org.projectlombok:lombok'
-	testAnnotationProcessor 'org.projectlombok:lombok'
-
-
-	testImplementation 'org.testcontainers:postgresql:1.21.4'
-    testImplementation 'org.testcontainers:junit-jupiter:1.21.4'
-    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-	// Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-webmvc-test
-	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test:4.0.6'
-}
-
-
-jacocoTestReport {
-    reports {
-        xml.required = true
+        // Интегрируем динамический путь XML отчета JaCoCo напрямую из задачи
+        property "sonar.coverage.jacoco.xmlReportPaths", "${tasks.jacocoTestReport.reports.xml.outputLocation.get().asFile.absolutePath}"
     }
 }
 
 tasks.named('test') {
-  	useJUnitPlatform()
-  	testLogging {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport // Автоматически запускает генерацию XML после тестов
+    
+    testLogging {
         events "failed"
         exceptionFormat "full"
         showExceptions true
         showCauses true
         showStackTraces true
-		showStandardStreams = true 
+        showStandardStreams = true 
+    }
+}
+jacocoTestCoverageVerification.enabled = false
+
+/*
+// 3. Исправленная верификация с исключением мусорных классов
+jacocoTestCoverageVerification {
+    dependsOn jacocoTestReport // Сначала строим отчет, затем проверяем порог
+    violationRules {
+        rule {
+            element = 'CLASS'
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+            // Исключаем DTO, мапперы и конфигурации, чтобы они не давали 0% покрытия
+            excludes = [
+                '*.UserServiceInnoApplication',
+                'com.example.user_service_inno.api.dto.*',
+                'com.example.user_service_inno.api.mapper.*',
+                'com.example.user_service_inno.entity.*',
+                'com.example.user_service_inno.service.exceptions.*',
+                'com.example.user_service_inno.config.*'
+            ]
+        }
     }
 }
 
+
+// Встраиваем верификацию в стандартный цикл сборки Gradle
+check.dependsOn jacocoTestCoverageVerification
+*/
 tasks.named('bootRun') {
     def envFile = file('.env')
     if (envFile.exists()) {

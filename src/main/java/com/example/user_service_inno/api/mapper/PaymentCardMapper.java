@@ -4,14 +4,15 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import com.example.user_service_inno.api.dto.PaymentCardDTO;
 import com.example.user_service_inno.entity.PaymentCard;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface PaymentCardMapper {
     
-    @Mapping(target = "user_id", source = "user.id")
+    @Mapping(target = "userId", source = "user.id")
     PaymentCardDTO toDto(PaymentCard paymentCard);
 
     @Mapping(target = "id", ignore = true)

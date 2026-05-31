@@ -6,20 +6,25 @@ import java.util.UUID;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.user_service_inno.api.dto.PaymentCardDTO;
+import com.example.user_service_inno.api.dto.UserDTO;
 import com.example.user_service_inno.api.mapper.PaymentCardMapper;
+import com.example.user_service_inno.api.mapper.UserMapper;
 import com.example.user_service_inno.entity.PaymentCard;
 import com.example.user_service_inno.entity.User;
 import com.example.user_service_inno.repository.PaymentCardRepository;
 import com.example.user_service_inno.repository.UserRepository;
 import com.example.user_service_inno.service.exceptions.CardLimitExceededException;
 import com.example.user_service_inno.service.exceptions.ResourceNotFoundException;
+import com.example.user_service_inno.specification.PaymentCardSpecifications;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,6 +35,7 @@ public class PaymentCardService {
     private final PaymentCardRepository paymentCardRepository;
     private final UserRepository userRepository;
     private final PaymentCardMapper paymentCardMapper;
+    private final UserMapper userMapper;
     
     @Transactional
     @CacheEvict(value = "userCards", key = "#userId")
@@ -73,24 +79,34 @@ public class PaymentCardService {
     }
 
     @Transactional
-    @CacheEvict(value = "cards", key = "#id")
-    public void deletePaymentCard(UUID id){
-        PaymentCard card = paymentCardRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Card not found with id: " + id));
+    @Caching(evict = {
+        @CacheEvict(value = "cards", key = "#id"),
+        @CacheEvict(value = "userCards", key = "#result.id", condition = "#result != null")
+    })
+    public UserDTO deletePaymentCard(UUID id) {
+        PaymentCard card = paymentCardRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Card not found with id: " + id));
+        
         User user = card.getUser();
+        
         if (user != null && user.getCards() != null) {
             user.getCards().remove(card);
         }
-        paymentCardRepository.delete(card);
-        
+        return userMapper.toDto(user); 
     }
 
+
     @Transactional
-    public Page<PaymentCardDTO> getAllPaymentCards(int page, int size) {
+    public Page<PaymentCardDTO> getAllPaymentCards(String holder, Boolean isActive,int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<PaymentCard> paymentCardPage = paymentCardRepository.findAll(pageable);
+        Specification<PaymentCard> spec = Specification
+            .where(PaymentCardSpecifications.hasHolder(holder))
+            .and(PaymentCardSpecifications.hasActiveStatus(isActive));
 
-        return paymentCardPage.map(paymentCardMapper::toDto);
+        Page<PaymentCard> cardPage = paymentCardRepository.findAll(spec, pageable);
+
+        return cardPage.map(paymentCardMapper::toDto);
     }
 
     @Cacheable(value = "userCards", key = "#userId")
@@ -107,7 +123,6 @@ public class PaymentCardService {
     public PaymentCardDTO activatePaymentCard(UUID id){
         PaymentCard card = paymentCardRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Card not found with id: " + id));
         card.setIsActive(true);
-        paymentCardRepository.save(card);
         return paymentCardMapper.toDto(card);
     }
     
@@ -116,7 +131,6 @@ public class PaymentCardService {
     public PaymentCardDTO deactivatePaymentCard(UUID id){
         PaymentCard card = paymentCardRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Card not found with id: " + id));
         card.setIsActive(false);
-        paymentCardRepository.save(card);
         return paymentCardMapper.toDto(card);
     }
     

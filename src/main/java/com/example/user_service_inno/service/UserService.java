@@ -68,6 +68,7 @@ public class UserService {
 
         return userPage.map(userMapper::toDto);
     }
+
     
     @Transactional
     @CachePut(value = "users", key = "#id")
@@ -76,7 +77,6 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         
         user.setIsActive(true);
-        userRepository.save(user);
         return userMapper.toDto(user);
     }
     @Transactional
@@ -86,7 +86,6 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         
         user.setIsActive(false);
-        userRepository.save(user);
         return userMapper.toDto(user);
     }
     
@@ -100,5 +99,4 @@ public class UserService {
             throw new ResourceNotFoundException("User not found with id: " + id);
         }
     }
-
 }

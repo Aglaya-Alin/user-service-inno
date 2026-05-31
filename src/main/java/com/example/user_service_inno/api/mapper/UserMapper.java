@@ -15,11 +15,13 @@ public interface UserMapper {
 
     UserDTO toDto(User user);
 
+    @Mapping(target = "cards", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     User toEntity(UserDTO userDTO);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "cards", ignore = true)
     void updateEntityFromDto(UserDTO dto, @MappingTarget User entity);
 }
