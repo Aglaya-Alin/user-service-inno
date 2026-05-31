@@ -9,6 +9,21 @@ plugins {
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 
+jacocoTestReport {
+    reports {
+        xml.required = true
+    }
+}
+
+sonar {
+    properties {
+        property "sonar.projectKey", "Aglaya-Alin_user-service-inno"
+        property "sonar.organization", "aglaya-alin"
+        property "sonar.host.url", "https://sonarcloud.io"
+		property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
+    }
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -57,29 +72,20 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test:4.0.6'
 }
 
-// 1. Единая настройка генерации отчетов JaCoCo
+
 jacocoTestReport {
-    dependsOn test // Отчет строится только после прохождения тестов
+    dependsOn test
     reports {
         xml.required = true
         html.required = true
     }
 }
 
-// 2. Исправленная настройка Sonar с динамическим путем к отчету
-sonar {
-    properties {
-        property "sonar.projectKey", "Aglaya-Alin_user-service-inno"
-        property "sonar.organization", "aglaya-alin"
-        property "sonar.host.url", "https://sonarcloud.io"
-        // Интегрируем динамический путь XML отчета JaCoCo напрямую из задачи
-        property "sonar.coverage.jacoco.xmlReportPaths", "${tasks.jacocoTestReport.reports.xml.outputLocation.get().asFile.absolutePath}"
-    }
-}
+
 
 tasks.named('test') {
     useJUnitPlatform()
-    finalizedBy jacocoTestReport // Автоматически запускает генерацию XML после тестов
+    finalizedBy jacocoTestReport
     
     testLogging {
         events "failed"
@@ -92,35 +98,6 @@ tasks.named('test') {
 }
 jacocoTestCoverageVerification.enabled = false
 
-/*
-// 3. Исправленная верификация с исключением мусорных классов
-jacocoTestCoverageVerification {
-    dependsOn jacocoTestReport // Сначала строим отчет, затем проверяем порог
-    violationRules {
-        rule {
-            element = 'CLASS'
-            limit {
-                counter = 'LINE'
-                value = 'COVEREDRATIO'
-                minimum = 0.80
-            }
-            // Исключаем DTO, мапперы и конфигурации, чтобы они не давали 0% покрытия
-            excludes = [
-                '*.UserServiceInnoApplication',
-                'com.example.user_service_inno.api.dto.*',
-                'com.example.user_service_inno.api.mapper.*',
-                'com.example.user_service_inno.entity.*',
-                'com.example.user_service_inno.service.exceptions.*',
-                'com.example.user_service_inno.config.*'
-            ]
-        }
-    }
-}
-
-
-// Встраиваем верификацию в стандартный цикл сборки Gradle
-check.dependsOn jacocoTestCoverageVerification
-*/
 tasks.named('bootRun') {
     def envFile = file('.env')
     if (envFile.exists()) {
