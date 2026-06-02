@@ -2,10 +2,10 @@ spring:
   cache:
     type: none
   datasource:
-    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-    url: jdbc:tc:postgresql:16-alpine:///test_db 
-    username: test
-    password: test
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/test_db
+    username: test_user
+    password: test_pass
   jpa:
     hibernate:
       ddl-auto: none
@@ -17,8 +17,3 @@ spring:
   liquibase:
     enabled: true
     changelog: classpath:db/changelog/db.changelog-master.yaml
-
-logging:
-  level:
-    org.springframework.web: INFO
-    org.hibernate.SQL: DEBUG

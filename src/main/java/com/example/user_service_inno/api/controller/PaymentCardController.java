@@ -21,51 +21,52 @@ import com.example.user_service_inno.api.dto.PaymentCardDTO;
 import com.example.user_service_inno.service.PaymentCardService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @RequestMapping("/cards")
 @RestController
 public class PaymentCardController {
-    @Autowired private PaymentCardService paymentCardService;
+    private final PaymentCardService paymentCardService;
 
-    @DeleteMapping("/{card_id}")
-    public ResponseEntity<PaymentCardDTO> deleteCard(@PathVariable("card_id") UUID cardId) {
+    @DeleteMapping("/{cardId}")
+    public ResponseEntity<Void> deleteCard(@PathVariable UUID cardId) {
         paymentCardService.deletePaymentCard(cardId);
 
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @GetMapping("/{card_id}")
+    @GetMapping("/{cardId}")
     public ResponseEntity<PaymentCardDTO> getCardById(
-            @PathVariable("card_id") UUID id
+            @PathVariable UUID cardId
     ) {
-        PaymentCardDTO card = paymentCardService.getPaymentCardById(id);
+        PaymentCardDTO card = paymentCardService.getPaymentCardById(cardId);
         return ResponseEntity.ok(card);
     }
 
     @GetMapping
     public ResponseEntity<Page<PaymentCardDTO>> getAllCards(
+        @RequestParam(required = false) String holder,
+        @RequestParam(required = false) Boolean isActive,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size
     ) {
-        Page<PaymentCardDTO> paymentCardDtos = paymentCardService.getAllPaymentCards(page, size);
+        Page<PaymentCardDTO> paymentCardDtos = paymentCardService.getAllPaymentCards(holder, isActive, page, size);
         return ResponseEntity.status(HttpStatus.OK).body(paymentCardDtos);
     }
 
-    @GetMapping("/{user_id}")
+    @GetMapping("/user/{userId}")
     public ResponseEntity<List<PaymentCardDTO>> getAllCardsByUserId(
-            @PathVariable("user_id") UUID userId
+            @PathVariable UUID userId
     ) {
-        List<PaymentCardDTO> paymentCardDtos = paymentCardService
-                .getAllPaymentCardByUserId(userId);
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(paymentCardDtos);
+        List<PaymentCardDTO> paymentCardDtos = paymentCardService.getAllPaymentCardByUserId(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(paymentCardDtos);
     }
 
+
     @PostMapping
-    public ResponseEntity<?> addCard(
-            UUID userId,
+    public ResponseEntity<PaymentCardDTO> addCard(
+            @RequestParam UUID userId,
             @RequestBody @Valid PaymentCardDTO paymentCardDto
     ) {
         PaymentCardDTO createdCard = paymentCardService
@@ -74,8 +75,8 @@ public class PaymentCardController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCard);
     }
 
-    @PatchMapping("/{card_id}")
-    public ResponseEntity<?> updateCard(@PathVariable("card_id") UUID cardId,
+    @PatchMapping("/{cardId}")
+    public ResponseEntity<PaymentCardDTO> updateCard(@PathVariable UUID cardId,
                                               @RequestBody @Valid PaymentCardDTO cardDTO
     ) {
         PaymentCardDTO updateCard = paymentCardService
@@ -86,15 +87,15 @@ public class PaymentCardController {
                 .body(updateCard);
     }
 
-    @PatchMapping("/activate/{card_id}")
-    public ResponseEntity<PaymentCardDTO> activateCard(@PathVariable("card_id") UUID cardId) {
+    @PatchMapping("/activate/{cardId}")
+    public ResponseEntity<PaymentCardDTO> activateCard(@PathVariable UUID cardId) {
         PaymentCardDTO activatedCardDto = paymentCardService.activatePaymentCard(cardId);
 
         return ResponseEntity.status(HttpStatus.OK).body(activatedCardDto);
     }
 
-    @PatchMapping("/deactivate/{card_id}")
-    public ResponseEntity<PaymentCardDTO> deactivateCard(@PathVariable("card_id") UUID cardId) {
+    @PatchMapping("/deactivate/{cardId}")
+    public ResponseEntity<PaymentCardDTO> deactivateCard(@PathVariable UUID cardId) {
         PaymentCardDTO deactivatedCardDto = paymentCardService.deactivatePaymentCard(cardId);
 
         return ResponseEntity.status(HttpStatus.OK).body(deactivatedCardDto);

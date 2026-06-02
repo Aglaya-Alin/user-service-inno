@@ -153,7 +153,6 @@ public class UserServiceTest {
         );
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.save(user)).thenReturn(user);
         when(userMapper.toDto(user)).thenReturn(activeUserDto);
 
         UserDTO result = userService.activateUser(userId);
@@ -173,7 +172,6 @@ public class UserServiceTest {
         );
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.save(user)).thenReturn(user);
         when(userMapper.toDto(user)).thenReturn(inactiveUserDto);
 
         UserDTO result = userService.deactivateUser(userId);
@@ -191,4 +189,51 @@ public class UserServiceTest {
         assertDoesNotThrow(() -> userService.deleteUserById(userId));
         verify(userRepository, times(1)).deleteById(userId);
     }
+
+        @Test
+    void updateUser_WhenUserDoesNotExist_ShouldThrowResourceNotFoundException() {
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> userService.updateUser(userId, userDto));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void activateUser_WhenUserDoesNotExist_ShouldThrowResourceNotFoundException() {
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> userService.activateUser(userId));
+    }
+
+    @Test
+    void deactivateUser_WhenUserDoesNotExist_ShouldThrowResourceNotFoundException() {
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> userService.deactivateUser(userId));
+    }
+
+    @Test
+    void deleteUserById_WhenUserDoesNotExist_ShouldThrowResourceNotFoundException() {
+        when(userRepository.existsById(userId)).thenReturn(false);
+
+        assertThrows(ResourceNotFoundException.class, () -> userService.deleteUserById(userId));
+        verify(userRepository, never()).deleteById(any(UUID.class));
+    }
+
+    @Test
+    void getAllUsersByNameOrSurname_WhenNoUsersFound_ShouldReturnEmptyPage() {
+
+        int page = 0;
+        int size = 10;
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> emptyPage = Page.empty();
+
+        when(userRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(emptyPage);
+
+        Page<UserDTO> result = userService.getAllUsersByNameOrSurname("Unknown", "User", page, size);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
 }

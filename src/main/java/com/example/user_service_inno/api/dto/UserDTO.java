@@ -20,7 +20,7 @@ public record UserDTO (
     @NotBlank(message = "Name cannot be blank")
     String name,
 
-    @NotBlank(message = "surname cannot be blank")
+    @NotBlank(message = "Surname cannot be blank")
     String surname,
 
     @NotNull(message = "Birth date is required")

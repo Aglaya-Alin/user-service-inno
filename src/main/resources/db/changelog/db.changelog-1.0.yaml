@@ -31,6 +31,7 @@ databaseChangeLog:
                   type: VARCHAR(500)
                   constraints:
                     nullable: false
+                    unique: true
               - column:
                   name: is_active
                   type: BOOLEAN
@@ -72,7 +73,7 @@ databaseChangeLog:
                   type: UUID
               - column:
                   name: number
-                  type: BIGINT
+                  type: VARCHAR(20)
                   constraints:
                     nullable: false
               - column:
@@ -80,7 +81,7 @@ databaseChangeLog:
                   type: VARCHAR(500)
               - column:
                   name: expiration_date
-                  type: TIMESTAMPTZ
+                  type: DATE
                   constraints:
                     nullable: false
               - column:
@@ -109,6 +110,6 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseTableName: payment_cards
             baseColumnNames: user_id
-            referencedTableName: users # Убедитесь, что таблица users создана ДО этого момента!
+            referencedTableName: users
             referencedColumnNames: id
             constraintName: fk_payment_cards_user

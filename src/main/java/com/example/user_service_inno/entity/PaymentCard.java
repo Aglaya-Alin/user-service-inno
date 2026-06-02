@@ -2,6 +2,7 @@ package com.example.user_service_inno.entity;
 
 
 import java.time.Instant;
+import java.time.YearMonth;
 import java.util.UUID;
 
 import org.hibernate.annotations.DynamicUpdate;
@@ -15,6 +16,7 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -22,37 +24,34 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Setter
 @Getter
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 @DynamicUpdate
-@Table(name = "payment_cards")
+@Table(name = "payment_cards", indexes = {
+        @Index(name = "user_id_index", columnList = "user_id")
+    })
 public class PaymentCard {
     
-    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Setter
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Setter
     @Column(nullable = false)
-    private Long number;
+    private String number;
 
-    @Setter
     @Column(nullable = false)
     private String holder;
 
-    @Setter
-    @Column(nullable = false, name = "expiration_date")
-    private Instant expirationDate;
+    @Column(nullable = false, name = "expiration_date", columnDefinition = "DATE")
+    private YearMonth expirationDate;
 
-    @Setter
     @Column(nullable = false, name = "is_active")
     private Boolean isActive = true;
 
@@ -60,8 +59,7 @@ public class PaymentCard {
     @Column(updatable = false, name = "created_at", nullable = false)
     private Instant createdAt;
 
-    
-    @Setter
+
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
