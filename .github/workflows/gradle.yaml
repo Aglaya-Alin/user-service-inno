@@ -65,8 +65,12 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONARCLOUD_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: >
-        ./gradlew sonar --info -Dsonar.qualitygate.wait=true
+        ./gradlew sonar --info 
+        -Dsonar.organization=aglaya-alin 
+        -Dsonar.projectKey=Aglaya-Alin_user-service-inno 
+        -Dsonar.qualitygate.wait=true
 
   docker-build:
     runs-on: ubuntu-latest
